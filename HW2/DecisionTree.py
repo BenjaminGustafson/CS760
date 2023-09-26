@@ -56,6 +56,9 @@ class DecisionTree:
 
                 info_gain_ratio = self._info_gain_ratio(left, right, parent_entropy)
 
+                if info_gain_ratio is None:
+                    return None
+
                 if info_gain_ratio > best_info_gain_ratio:
                     best_info_gain_ratio = info_gain_ratio
                     best_split = {'feature' : feature, 'threshold': threshold}
@@ -73,14 +76,18 @@ class DecisionTree:
         info_gain = parent_entropy - ( left_portion * left_entropy) \
                     - (right_portion * right_entropy)
         
+
         if left_portion == 0 or right_portion == 0:
             return 0
         
         split_entropy = - (left_portion * np.log2(left_portion) \
                            + right_portion * np.log2(right_portion))
 
-        info_gain_ratio = info_gain / split_entropy
+        if split_entropy == 0:
+            return None
 
+
+        info_gain_ratio = info_gain / split_entropy
         return info_gain_ratio
 
     def _entropy(self, y):
@@ -123,7 +130,7 @@ class DecisionTree:
         if 'leaf' in node:
             print('|\t'*depth + str(node['leaf']))
         else:
-            print('|\t'*depth + f"If feature {node['node']['feature']} >=  {node['node']['threshold']}")
+            print('|\t'*depth + f"If feature {node['node']['feature']+1} >=  {node['node']['threshold']}")
             self._print_helper(node['left'],depth+1)
             print('|\t'*depth + 'else')
             self._print_helper(node['right'],depth+1)
@@ -135,13 +142,15 @@ def accuracy(y, y_pred):
 def plot(X,y):
     X_class0 = X[y == 0]
     X_class1 = X[y == 1]
-    plt.scatter(X_class0[:, 0], X_class0[:, 1], c='b', marker='o', label='Class 0')
-    plt.scatter(X_class1[:, 0], X_class1[:, 1], c='r', marker='x', label='Class 1')
+    plt.scatter(X_class0[:, 0], X_class0[:, 1], c='b', marker='o', label='0')
+    plt.scatter(X_class1[:, 0], X_class1[:, 1], c='r', marker='x', label='1')
     plt.xlabel('Feature 1')
     plt.ylabel('Feature 2')
     plt.legend(loc='best')
-    plt.title('Scatter Plot of Data with Binary Classification')
+    plt.title('')
     plt.show()
+
+
 
 tree = DecisionTree()
 """
@@ -160,11 +169,13 @@ print(tree._find_best_split(np.array([[0.5,0.5]]) , np.array([1])))
 print(tree._find_best_split(np.array([[0.5,0.1],[0.2,0.6],[0.3,0.4]]) , np.array([1,1,1])))
 """
 
-(X,y) = read_data('HW2/data/D2.txt')
+(X,y) = read_data('HW2/data/D3leaves.txt')
+# X = np.array([[0,0],[0,1],[1,0],[1,1]])
+# y = np.array([1,0,0,1])
 tree.fit(X, y)
+print("")
 tree.print()
 y_pred = tree.predict(X)
-print(f"accuracy {accuracy(y,y_pred)}")
-
-#plot(X,y)
+#print(f"accuracy {accuracy(y,y_pred)}")
+plot(X,y)
 
