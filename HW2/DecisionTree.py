@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 def read_data(filename):
     X = []
@@ -135,6 +136,36 @@ class DecisionTree:
             print('|\t'*depth + 'else')
             self._print_helper(node['right'],depth+1)
 
+    def visualize(self):
+        X_class0 = X[y == 0]
+        X_class1 = X[y == 1]
+        plt.scatter(X_class0[:, 0], X_class0[:, 1], c='b', marker='o', label='0')
+        plt.scatter(X_class1[:, 0], X_class1[:, 1], c='r', marker='x', label='1')
+        plt.xlabel('Feature 1')
+        plt.ylabel('Feature 2')
+        plt.legend(loc='best')
+        plt.title('')
+        min0 = min(X[:,0])
+        min1 = min(X[:,1])
+        max0 = max(X[:,0])
+        max1 = max(X[:,1])
+        self._visualize_helper(self.tree, min0, min1, max0, max1)
+        plt.show()
+    
+    def _visualize_helper(self, node, min0, min1, max0, max1):
+        if 'leaf' in node:
+            edgecolor = 'r' if node['leaf'] == 1 else 'b'
+            facecolor = 'red' if node['leaf'] == 1 else 'blue'
+            rect = patches.Rectangle((min0, min1), max0 - min0, max1 - min1, linewidth=1, edgecolor=edgecolor, facecolor=facecolor, alpha=0.3)
+            plt.gca().add_patch(rect)
+        else:
+            if node['node']['feature'] == 0:
+                self._visualize_helper(node['right'], min0,min1, node['node']['threshold'], max1)
+                self._visualize_helper(node['left'], node['node']['threshold'], min1, max0, max1)
+            else:
+                self._visualize_helper(node['right'], min0,min1,max0 , node['node']['threshold'])
+                self._visualize_helper(node['left'], min0, node['node']['threshold'], max0, max1)
+
 
 def accuracy(y, y_pred):
     return np.sum(y == y_pred)/len(y)
@@ -169,13 +200,14 @@ print(tree._find_best_split(np.array([[0.5,0.5]]) , np.array([1])))
 print(tree._find_best_split(np.array([[0.5,0.1],[0.2,0.6],[0.3,0.4]]) , np.array([1,1,1])))
 """
 
-(X,y) = read_data('HW2/data/D3leaves.txt')
+(X,y) = read_data('HW2/data/D1.txt')
 # X = np.array([[0,0],[0,1],[1,0],[1,1]])
 # y = np.array([1,0,0,1])
 tree.fit(X, y)
 print("")
 tree.print()
 y_pred = tree.predict(X)
+tree.visualize()
 #print(f"accuracy {accuracy(y,y_pred)}")
-plot(X,y)
+#plot(X,y)
 
