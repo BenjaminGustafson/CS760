@@ -136,14 +136,26 @@ class DecisionTree:
             print('|\t'*depth + 'else')
             self._print_helper(node['right'],depth+1)
 
+    def count_nodes(self):
+        return self._count_helper(self.tree)
+    
+    def _count_helper(self, node):
+        if 'leaf' in node:
+            return 1
+        else:
+            return self._count_helper(node['left']) + self._count_helper(node['right'])
+
     def visualize(self):
         X_class0 = X[y == 0]
         X_class1 = X[y == 1]
-        plt.scatter(X_class0[:, 0], X_class0[:, 1], c='b', marker='o', label='0')
-        plt.scatter(X_class1[:, 0], X_class1[:, 1], c='r', marker='x', label='1')
+        #plt.scatter(X_class0[:, 0], X_class0[:, 1], c='b', marker='o', label='0')
+        #plt.scatter(X_class1[:, 0], X_class1[:, 1], c='r', marker='x', label='1')
+        ax = plt.gca()
+        ax.set_xlim([-1.5, 1.5])
+        ax.set_ylim([-1.5, 1.5])
         plt.xlabel('Feature 1')
         plt.ylabel('Feature 2')
-        plt.legend(loc='best')
+        #plt.legend(loc='best')
         plt.title('')
         min0 = min(X[:,0])
         min1 = min(X[:,1])
@@ -200,14 +212,29 @@ print(tree._find_best_split(np.array([[0.5,0.5]]) , np.array([1])))
 print(tree._find_best_split(np.array([[0.5,0.1],[0.2,0.6],[0.3,0.4]]) , np.array([1,1,1])))
 """
 
-(X,y) = read_data('HW2/data/D1.txt')
-# X = np.array([[0,0],[0,1],[1,0],[1,1]])
-# y = np.array([1,0,0,1])
-tree.fit(X, y)
-print("")
-tree.print()
-y_pred = tree.predict(X)
-tree.visualize()
+# (X,y) = read_data('HW2/data/Dbig.txt')
+# # X = np.array([[0,0],[0,1],[1,0],[1,1]])
+# # y = np.array([1,0,0,1])
+# tree.fit(X, y)
+# print("")
+# tree.print()
+# y_pred = tree.predict(X)
+# tree.visualize()
 #print(f"accuracy {accuracy(y,y_pred)}")
 #plot(X,y)
 
+(X,y) = read_data('HW2/data/Dbig.txt')
+permuted_indices = np.random.permutation(X.shape[0])
+perm_X = X[permuted_indices]
+perm_y = y[permuted_indices]
+X_test = perm_X[8192:]
+y_test = perm_y[8192:]
+for n in [32,128,2048,8192]:
+    tree.fit(perm_X[:n], perm_y[:n])
+    y_pred = tree.predict(X_test)
+    print(f"D{n} Accuracy {accuracy(y_test, y_pred)} num nodes {tree.count_nodes()}")
+    tree.visualize()
+#  128 512 2048 8192
+#n, error, num nodes, plot n vs err (learning curve)
+# visualize boundary
+# y_pred = tree.predict(X)
