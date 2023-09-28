@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from sklearn.tree import DecisionTreeClassifier
 
 def read_data(filename):
     X = []
@@ -230,10 +231,16 @@ perm_y = y[permuted_indices]
 X_test = perm_X[8192:]
 y_test = perm_y[8192:]
 for n in [32,128,2048,8192]:
-    tree.fit(perm_X[:n], perm_y[:n])
-    y_pred = tree.predict(X_test)
-    print(f"D{n} Accuracy {accuracy(y_test, y_pred)} num nodes {tree.count_nodes()}")
-    tree.visualize()
+    clf = DecisionTreeClassifier(random_state=0)
+    clf.fit(perm_X[:n], perm_y[:n])
+    num_nodes = clf.tree_.node_count
+    y_pred = clf.predict(X_test)
+    #accuracy = accuracy_score(y_test, y_pred)
+
+    # tree.fit(perm_X[:n], perm_y[:n])
+    # y_pred = tree.predict(X_test)
+    print(f"D{n} Accuracy {accuracy(y_test, y_pred)} num nodes {num_nodes}")
+    # tree.visualize()
 #  128 512 2048 8192
 #n, error, num nodes, plot n vs err (learning curve)
 # visualize boundary
